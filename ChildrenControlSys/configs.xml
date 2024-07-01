@@ -61,7 +61,7 @@
 		<browser>chrome</browser>
 		<browser>browser</browser>
 	</browsers>
-	<internet>Yes</internet>
+	<internet>No</internet>
 	<time>120</time>
 	<lastUse date="2024-06-30">20</lastUse>
 </configs>

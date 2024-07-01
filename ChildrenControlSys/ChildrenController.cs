@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Xml.Linq;
 
 namespace ChildrenControlSys
 {
@@ -27,7 +28,7 @@ namespace ChildrenControlSys
         {
             // Create a timer with a ten second interval.
             //1000 * 60 * 1
-            aTimer = new System.Timers.Timer(10000);
+            aTimer = new System.Timers.Timer(15000);
 
             // Hook up the Elapsed event for the timer.
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
@@ -35,21 +36,37 @@ namespace ChildrenControlSys
             // Set the Interval to 2 seconds (2000 milliseconds).
             //aTimer.Interval = 2000;
             aTimer.Enabled = true;
-            /*
-            // instantiate the thread
-            m_thread = new Thread(new ThreadStart(ThreadProc));
-            // start the thread
-            m_thread.Start();
-            WriteLog(DateTime.Today.ToShortTimeString());
-            */
+          
         }
 
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
         {
             try
             {
-                WriteLog(string.Format("The Elapsed event was raised at {0}", e.SignalTime));
-                WindowsByClassFinder.CloseBrowsers(true);                
+                //Close browsers
+                LogUtil.WriteLog(string.Format("The Elapsed event was raised at {0}", e.SignalTime));
+                //WindowsByClassFinder.CloseBrowsers(true);
+
+                //On-Off Internet
+                string sPath = Path.Combine(@"C:\Users\khanh\source\repos\ChildrenControlSys\ChildrenControlSys\bin\Debug", "configs.xml");
+                XDocument xmlDoc = XDocument.Load(sPath);
+                var inet = xmlDoc.Descendants("configs").First().Element("internet").Value.ToString().Trim();
+                LogUtil.WriteLog(inet);
+
+                if ((inet =="Yes") || (inet == "yes"))
+                {
+                    if (!ParentalController.IsExisted("iNetPolicy"))
+                    {
+                        ParentalController.AddFirewallRules("iNetPolicy");
+                        LogUtil.WriteLog("Add rule");
+                    }                    
+                }
+                else
+                {
+                    //Remove all policies
+                    ParentalController.RemoveFirewallRules("iNetPolicy");
+                    LogUtil.WriteLog("Remove rule");
+                } 
             }
             catch (Exception ex)
             {
