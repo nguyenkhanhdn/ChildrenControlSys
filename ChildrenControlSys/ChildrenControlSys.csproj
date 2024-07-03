@@ -64,6 +64,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebBrowserController.cs" />
+    <Compile Include="WindowsByClassFinder.cs" />
+    <Compile Include="WindowTitle.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

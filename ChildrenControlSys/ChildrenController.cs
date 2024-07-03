@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,7 +19,12 @@ namespace ChildrenControlSys
     {
         Thread m_thread = null;
         private static System.Timers.Timer aTimer;
+        private static System.Timers.Timer aTimer2;
 
+        private List<string> keywords = new List<string>();
+        private List<string> applications = new List<string>();
+
+        private string sPath = Path.Combine(@"C:\Users\khanh\source\repos\ChildrenControlSys\ChildrenControlSys\bin\Debug", "configs.xml");
         public ChildrenControlSystem()
         {
             InitializeComponent();
@@ -28,7 +34,7 @@ namespace ChildrenControlSys
         {
             // Create a timer with a ten second interval.
             //1000 * 60 * 1
-            aTimer = new System.Timers.Timer(15000);
+            aTimer = new System.Timers.Timer(15000);            
 
             // Hook up the Elapsed event for the timer.
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
@@ -43,30 +49,79 @@ namespace ChildrenControlSys
         {
             try
             {
+                // Load XML from a file
+                XDocument xmlDoc = XDocument.Load(sPath);
+
+                // Get all 'keywords' elements within the 'configs' element
+                IEnumerable<XElement> keywordElements = xmlDoc.Element("configs").Elements("keywords").Elements("keyword");
+                
+                // Get all 'author' elements in the XML document
+                IEnumerable<XElement> applicationElements = xmlDoc.Element("configs").Elements("applications").Elements("application");
+                
                 //Close browsers
                 LogUtil.WriteLog(string.Format("The Elapsed event was raised at {0}", e.SignalTime));
-                //WindowsByClassFinder.CloseBrowsers(true);
+                
 
-                //On-Off Internet
-                string sPath = Path.Combine(@"C:\Users\khanh\source\repos\ChildrenControlSys\ChildrenControlSys\bin\Debug", "configs.xml");
-                XDocument xmlDoc = XDocument.Load(sPath);
-                var inet = xmlDoc.Descendants("configs").First().Element("internet").Value.ToString().Trim();
-                LogUtil.WriteLog(inet);
+                //On-Off Internet               
+                //XDocument xmlDoc = XDocument.Load(sPath);
+                var blockiNet = xmlDoc.Descendants("configs").First().Element("blockiNet").Value.ToString().Trim();
+                var blockKeyword = xmlDoc.Descendants("configs").First().Element("blockKeyword").Value.ToString().Trim();
+                var blockApplication = xmlDoc.Descendants("configs").First().Element("blockApplication").Value.ToString().Trim();
+                var blockBrowser = xmlDoc.Descendants("configs").First().Element("blockBrowser").Value.ToString().Trim();
 
-                if ((inet =="Yes") || (inet == "yes"))
+                
+                if (blockKeyword.Trim().ToLower() == "yes")
+                {
+                    try
+                    {
+                        var titles = WindowsByClassFinder.ChromeWindowTitles();
+                        foreach (var keyword in keywordElements)
+                        {                           
+                            foreach (var title in titles)
+                            {
+                                LogUtil.WriteLog(title);
+                                if (title.ToString().Contains(keyword.Value))
+                                {
+                                    WindowTitle.CloseWindow(keyword.Value, title);
+                                    LogUtil.WriteLog(keyword.Value + ":" + title);
+                                }
+                            }                            
+                        }                                                
+                    }
+                    catch (Exception ex) {
+                        LogUtil.WriteLog(ex.Message);
+                    }
+                }
+                else { }
+
+                if ((blockApplication == "Yes") || (blockApplication == "yes"))
+                {
+                    foreach(var app in applications)
+                    {
+                        ParentalController.BlockApps(app);
+                    }
+                }
+
+                if ((blockBrowser == "Yes") || (blockKeyword == "yes"))
+                {
+                    WindowsByClassFinder.CloseBrowsers(true);
+                }
+                
+                if ((blockiNet == "Yes") || (blockiNet == "yes"))
                 {
                     if (!ParentalController.IsExisted("iNetPolicy"))
                     {
                         ParentalController.AddFirewallRules("iNetPolicy");
                         LogUtil.WriteLog("Add rule");
+                    }
+                    else
+                    {
+                        //Remove all policies
+                        ParentalController.RemoveFirewallRules("iNetPolicy");
+                        LogUtil.WriteLog("Remove rule");
                     }                    
                 }
-                else
-                {
-                    //Remove all policies
-                    ParentalController.RemoveFirewallRules("iNetPolicy");
-                    LogUtil.WriteLog("Remove rule");
-                } 
+                
             }
             catch (Exception ex)
             {

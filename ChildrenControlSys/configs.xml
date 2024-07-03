@@ -49,11 +49,11 @@
 		<keyword>Online</keyword>
 	</keywords>
 	<applications>
-		<app id="1">msedge</app>
-		<app id="2">browser</app>
-		<app id="3">winword</app>
-		<app id="4">WINWORD</app>
-		<app id="5">Blue stack</app>
+		<application id="1">msedge</application>
+		<application id="2">browser</application>
+		<application id="3">winword</application>
+		<application id="4">WINWORD</application>
+		<application id="5">Blue stack</application>
 	</applications>
 	<browsers>
 		<browser>firefox</browser>
@@ -61,7 +61,10 @@
 		<browser>chrome</browser>
 		<browser>browser</browser>
 	</browsers>
-	<internet>No</internet>
+	<blockiNet>Yes</blockiNet>
+	<blockKeyword>No</blockKeyword>
+	<blockApplication>No</blockApplication>
+	<blockBrowser>No</blockBrowser>
 	<time>120</time>
 	<lastUse date="2024-06-30">20</lastUse>
 </configs>

@@ -12,7 +12,7 @@ using System.Xml.Linq;
 
 namespace ChildrenControlSys
 {
-    public class WindowsByClassFinder1
+    public class WindowsByClassFinder
     {
         public delegate bool EnumWindowsDelegate(IntPtr hWnd, IntPtr lparam);
 
@@ -31,16 +31,21 @@ namespace ChildrenControlSys
 
         [DllImport("user32.dll", EntryPoint = "GetWindowTextLength", SetLastError = true)]
         internal static extern int GetWindowTextLength(IntPtr hwnd);
+
+
         /// <summary>Find the windows matching the specified class name.</summary>
+
         public static IEnumerable<IntPtr> WindowsMatching(string className)
         {
-            return new WindowsByClassFinder1(className)._result;
+            return new WindowsByClassFinder(className)._result;
         }
-        private WindowsByClassFinder1(string className)
+
+        private WindowsByClassFinder(string className)
         {
             _className = className;
             EnumWindows(callback, IntPtr.Zero);
         }
+
         private bool callback(IntPtr hWnd, IntPtr lparam)
         {
             if (GetClassName(hWnd, _apiResult, _apiResult.Capacity) != 0)
@@ -50,7 +55,26 @@ namespace ChildrenControlSys
                     _result.Add(hWnd);
                 }
             }
+
             return true; // Keep enumerating.
+        }
+        public static IEnumerable<string> ChromeWindowTitles()
+        {
+            foreach (var title in WindowsByClassFinder.WindowTitlesForClass("Chrome_WidgetWin_0"))
+                if (!string.IsNullOrWhiteSpace(title))
+                    yield return title;
+
+            foreach (var title in WindowsByClassFinder.WindowTitlesForClass("Chrome_WidgetWin_1"))
+                if (!string.IsNullOrWhiteSpace(title))
+                    yield return title;
+
+            foreach (var title in WindowsByClassFinder.WindowTitlesForClass("MozillaWindowClass"))
+                if (!string.IsNullOrWhiteSpace(title))
+                    yield return title;
+
+            foreach (var title in WindowsByClassFinder.WindowTitlesForClass("IEFrame"))
+                if (!string.IsNullOrWhiteSpace(title))
+                    yield return title;
         }
         public static IEnumerable<string> WindowTitlesForClass(string className)
         {
@@ -66,7 +90,7 @@ namespace ChildrenControlSys
         {
             if (closeAllBrowsers)
             {
-             
+
                 //string sPath = Path.Combine(Environment.CurrentDirectory,  "configs.xml");
                 string sPath = Path.Combine(@"C:\Users\khanh\source\repos\ChildrenControlSys\ChildrenControlSys\bin\Debug", "configs.xml");
                 XDocument xmlDoc = XDocument.Load(sPath);
@@ -94,8 +118,34 @@ namespace ChildrenControlSys
                 {
                     p.Kill();
                 }
-            }            
+            }
         }
+        public static void CloseBrowsers()
+        {
+            Process[] processes = Process.GetProcessesByName("browser");
+            foreach (Process p in processes)
+            {
+                p.Kill();
+            }
+            processes = Process.GetProcessesByName("msedge");
+            foreach (Process p in processes)
+            {
+                p.Kill();
+            }
+
+            processes = Process.GetProcessesByName("firefox");
+            foreach (Process p in processes)
+            {
+                p.Kill();
+            }
+
+            processes = Process.GetProcessesByName("chrome");
+            foreach (Process p in processes)
+            {
+                p.Kill();
+            }
+        }
+
         public static List<string> GetProcesses()
         {
             List<string> processList = new List<string>();
@@ -106,6 +156,7 @@ namespace ChildrenControlSys
             }
             return processList;
         }
+
         public static IEnumerable<IntPtr> WindowsMatchingClassName(string className)
         {
             if (string.IsNullOrWhiteSpace(className))
