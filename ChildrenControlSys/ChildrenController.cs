@@ -74,7 +74,7 @@ namespace ChildrenControlSys
                 {
                     try
                     {
-                        var titles = WindowsByClassFinder.ChromeWindowTitles();
+                        var titles = GetAllBrowserTitles();
                         foreach (var keyword in keywordElements)
                         {                           
                             foreach (var title in titles)
@@ -129,6 +129,53 @@ namespace ChildrenControlSys
             }            
         }
 
+        public static List<string> GetAllBrowserTitles()
+        {
+            List<string> titles = new List<string>();
+            Process[] processes = Process.GetProcessesByName("browser");
+            foreach (Process p in processes)
+            {
+                if (p.MainWindowTitle.Length > 0)
+                {
+                    titles.Add(p.MainWindowTitle);
+                    /*
+                    string t = p.MainWindowTitle.Replace(" - Google Chrome", "");
+                    if (t.ToLower().Contains(this.BrowserTabText.ToLower()))
+                    {
+                        foundOne = true;
+                        this.WriteEventLogEntry($"Found Tab Title: {this.BrowserTabText} with PID: {p.Id}.  \r\nWe will close it.", EventLogEntryType.Information);
+                        p.CloseMainWindow();
+                        break;
+                    }*/
+
+                }
+            }
+            processes = Process.GetProcessesByName("msedge");
+            foreach (Process p in processes)
+            {
+                if (p.MainWindowTitle.Length > 0)
+                {
+                    titles.Add(p.MainWindowTitle);
+                }
+            }
+            processes = Process.GetProcessesByName("firefox");
+            foreach (Process p in processes)
+            {
+                if (p.MainWindowTitle.Length > 0)
+                {
+                    titles.Add(p.MainWindowTitle);
+                }
+            }
+            processes = Process.GetProcessesByName("chrome");
+            foreach (Process p in processes)
+            {
+                if (p.MainWindowTitle.Length > 0)
+                {
+                    titles.Add(p.MainWindowTitle);
+                }
+            }
+            return titles;
+        }
         private void ThreadProc()
         {
             // (1000 milliseconds = 1 second, 1 * 60 * 1000 = 60000)
